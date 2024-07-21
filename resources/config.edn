@@ -1,1 +1,2 @@
-{:port 4000}
+{:port 4000
+ :datomic-uri "datomic:mem://cumbuca"}
