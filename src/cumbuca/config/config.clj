@@ -1,6 +1,7 @@
 (ns cumbuca.config.config
-  (:require [clojure.java.io :as io]
-            [aero.core :as aero]))
+  (:require
+   [aero.core :as aero]
+   [clojure.java.io :as io]))
 
 (defn load-config
   {:init/name ::config
