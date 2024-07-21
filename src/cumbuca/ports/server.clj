@@ -1,23 +1,22 @@
-(ns cumbuca.ports.server)
+(ns cumbuca.ports.server
+  (:require [cumbuca.controllers.transactions :as controllers.transactions]
+            [cumbuca.contracts.in.customer :as in.customer]
+            [cumbuca.contracts.out.customer :as out.customer]))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
-(def ^{:init/tags [:reitit/route-data]} customer-routes
+(defn customer-routes
+  {:init/tags [:reitit/route-data]
+   :init/inject [:datomic/connect]} 
+  [datomic]
   ["/customers"
    {:tags #{"customers"}}
    ["/"
     {:post {:summary "Create a new customer"
-            :parameters {:body [:map
-                                [:name string?]
-                                [:email string?]
-                                [:password string?]
-                                [:tax-id string?]]}
-            :responses {200 {:body [:map
-                                    [:name string?]
-                                    [:email string?]]}}
+            :parameters {:body in.customer/customer}
+            :responses {200 {:body out.customer/customer}}
             :handler (fn [{{{:keys [name email]} :body} :parameters}]
                        {:status 200
-                        :body {:name name
-                               :email email}})}}]])
+                        :body (controllers.transactions/create {} datomic)})}}]])
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (def ^{:init/tags [:reitit/route-data]} auth-routes
