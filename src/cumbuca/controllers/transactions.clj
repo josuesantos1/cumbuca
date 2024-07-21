@@ -1,5 +1,6 @@
-(ns cumbuca.controllers.transactions 
-  (:require [cumbuca.database.datomic.transactions :as datomic.transactions]))
+(ns cumbuca.controllers.transactions
+  (:require
+   [cumbuca.database.datomic.transactions :as datomic.transactions]))
 
 (defn create
   [transaction

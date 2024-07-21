@@ -1,10 +1,10 @@
 (ns cumbuca.config.database
-  (:require [datomic.api :as d]
-            [cumbuca.contracts.schemas.customer :refer [customer]]
-            [cumbuca.contracts.schemas.transaction :refer [transaction]]))
+  (:require
+   [cumbuca.contracts.schemas.transaction :refer [transaction]]
+   [datomic.api :as d]))
 
 (def ^:private datomic-schemas
-  (->> [ transaction]
+  (->> [transaction]
        (map rest)))
 
 (defn create-schema
