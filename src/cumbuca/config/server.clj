@@ -39,39 +39,39 @@
 
 (def ^{:init/tags [:reitit/route-data]} main-routes
   ["/service"
-      {:tags #{"service"}}
+   {:tags #{"service"}}
 
-      ["/hello"
-       {:get {:summary "Hello world!"
-              :responses {200 {:body [:map [:version string?]]}}
-              :handler (fn [_]
-                         {:status 200
-                          :body {:version "Hello world!"}})}}]])
+   ["/hello"
+    {:get {:summary "Hello world!"
+           :responses {200 {:body [:map [:version string?]]}}
+           :handler (fn [_]
+                      {:status 200
+                       :body {:version "Hello world!"}})}}]])
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
-(defn router 
+(defn router
   {:init/inject [#{:reitit/route-data}]}
   [data]
   (ring/router
-    data
-    {:validate spec/validate
-     :exception pretty/exception
-     :data {:coercion (reitit.coercion.malli/create
-                       {:error-keys #{#_:type :coercion :in :schema :value :errors :humanized #_:transformed}
-                        :compile mu/closed-schema
-                        :strip-extra-keys true
-                        :default-values true
-                        :options nil})
-            :muuntaja m/instance
-            :middleware [swagger/swagger-feature
-                         openapi/openapi-feature
-                         parameters/parameters-middleware
-                         muuntaja/format-negotiate-middleware
-                         muuntaja/format-response-middleware
-                         exception/exception-middleware
-                         muuntaja/format-request-middleware
-                         coercion/coerce-response-middleware
-                         coercion/coerce-request-middleware]}}))
+   data
+   {:validate spec/validate
+    :exception pretty/exception
+    :data {:coercion (reitit.coercion.malli/create
+                      {:error-keys #{#_:type :coercion :in :schema :value :errors :humanized #_:transformed}
+                       :compile mu/closed-schema
+                       :strip-extra-keys true
+                       :default-values true
+                       :options nil})
+           :muuntaja m/instance
+           :middleware [swagger/swagger-feature
+                        openapi/openapi-feature
+                        parameters/parameters-middleware
+                        muuntaja/format-negotiate-middleware
+                        muuntaja/format-response-middleware
+                        exception/exception-middleware
+                        muuntaja/format-request-middleware
+                        coercion/coerce-response-middleware
+                        coercion/coerce-request-middleware]}}))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn ring-handler
