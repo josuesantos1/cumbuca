@@ -1,9 +1,10 @@
 (ns cumbuca.config.database
   (:require [datomic.api :as d]
-            [cumbuca.contracts.schemas.customer :refer [customer]]))
+            [cumbuca.contracts.schemas.customer :refer [customer]]
+            [cumbuca.contracts.schemas.transaction :refer [transaction]]))
 
 (def ^:private datomic-schemas
-  (->> [customer]
+  (->> [ transaction]
        (map rest)))
 
 (defn create-schema
@@ -16,7 +17,10 @@
 (defn coerce-type
   [[field type]]
   (cond (= type string?) [field :db.type/string]
-        (= type int?) [field :db.type/long]))
+        (= type int?) [field :db.type/long]
+        (= type keyword?) [field :db.type/keyword]
+        (= type uuid?) [field :db.type/uuid]
+        (= type inst?) [field :db.type/instant]))
 
 (defn coerce-types
   [field]
@@ -24,12 +28,14 @@
        (map coerce-type)
        (map create-schema)))
 
-(defn- create-datomic-schema
+(defn create-datomic-schema
   [datomic]
-  (->> datomic-schemas
-       (map coerce-types)
-       flatten
-       (d/transact datomic)))
+  (try (->> datomic-schemas
+            (map coerce-types)
+            flatten
+            (d/transact datomic))
+       (catch Exception e
+         (prn (.getMessage e)))))
 
 (defn datomic
   {:init/tags [:datomic/connect]
