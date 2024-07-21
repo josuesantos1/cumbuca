@@ -37,7 +37,8 @@
                                                             :name "Example-Api-Key"}}}}
            :handler (openapi/create-openapi-handler)}}]])
 
-(def ^{:init/tags [:reitit/route-data]} main-routes
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
+(def ^{:init/tags [:reitit/route-data]} service-routes
   ["/service"
    {:tags #{"service"}}
 
