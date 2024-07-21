@@ -19,17 +19,27 @@
 (def app
   (ring/ring-handler
    (ring/router
-    [["/openapi.json"
+    [["/swagger.json"
+      {:get {:no-doc true
+             :swagger {:info {:title "Cumbuca Docs"
+                              :description "Cumbuca Docs Api"
+                              :version "0.0.1"}
+                       :securityDefinitions {"auth" {:type :apiKey
+                                                     :in :header
+                                                     :name "api-key"}}}
+             :handler (swagger/create-swagger-handler)}}]
+     ["/openapi.json"
       {:get {:no-doc true
              :openapi {:info {:title "Cumbuca Docs"
                               :description "Cumbuca Docs Api"
                               :version "0.0.1"}
                        :components {:securitySchemes {"auth" {:type :apiKey
                                                               :in :header
-                                                              :name "api-key"}}}}
+                                                              :name "Example-Api-Key"}}}}
              :handler (openapi/create-openapi-handler)}}]
      ["/service"
       {:tags #{"service"}}
+
       ["/hello"
        {:get {:summary "Hello world!"
               :responses {200 {:body [:map [:version string?]]}}
