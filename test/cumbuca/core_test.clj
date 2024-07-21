@@ -1,6 +1,7 @@
 (ns cumbuca.core-test
-  (:require [clojure.test :refer :all]
-            [cumbuca.core :refer :all]))
+  (:require
+   [clojure.test :refer :all]
+   [cumbuca.core :refer :all]))
 
 (deftest a-test
   (testing "FIXME, I fail."
