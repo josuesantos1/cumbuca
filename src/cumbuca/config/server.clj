@@ -16,28 +16,29 @@
    [reitit.swagger-ui :as swagger-ui]
    [ring.adapter.jetty :as jetty]))
 
-(def app
-  (ring/ring-handler
-   (ring/router
-    [["/swagger.json"
-      {:get {:no-doc true
-             :swagger {:info {:title "Cumbuca Docs"
-                              :description "Cumbuca Docs Api"
-                              :version "0.0.1"}
-                       :securityDefinitions {"auth" {:type :apiKey
-                                                     :in :header
-                                                     :name "api-key"}}}
-             :handler (swagger/create-swagger-handler)}}]
-     ["/openapi.json"
-      {:get {:no-doc true
-             :openapi {:info {:title "Cumbuca Docs"
-                              :description "Cumbuca Docs Api"
-                              :version "0.0.1"}
-                       :components {:securitySchemes {"auth" {:type :apiKey
-                                                              :in :header
-                                                              :name "Example-Api-Key"}}}}
-             :handler (openapi/create-openapi-handler)}}]
-     ["/service"
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
+(def ^{:init/tags [:reitit/route-data]} docs-routes
+  [["/swagger.json"
+    {:get {:no-doc true
+           :swagger {:info {:title "Cumbuca Docs"
+                            :description "Cumbuca Docs Api"
+                            :version "0.0.1"}
+                     :securityDefinitions {"auth" {:type :apiKey
+                                                   :in :header
+                                                   :name "api-key"}}}
+           :handler (swagger/create-swagger-handler)}}]
+   ["/openapi.json"
+    {:get {:no-doc true
+           :openapi {:info {:title "Cumbuca Docs"
+                            :description "Cumbuca Docs Api"
+                            :version "0.0.1"}
+                     :components {:securitySchemes {"auth" {:type :apiKey
+                                                            :in :header
+                                                            :name "Example-Api-Key"}}}}
+           :handler (openapi/create-openapi-handler)}}]])
+
+(def ^{:init/tags [:reitit/route-data]} main-routes
+  ["/service"
       {:tags #{"service"}}
 
       ["/hello"
@@ -45,8 +46,14 @@
               :responses {200 {:body [:map [:version string?]]}}
               :handler (fn [_]
                          {:status 200
-                          :body {:version "Hello world!"}})}}]]]
+                          :body {:version "Hello world!"}})}}]])
 
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
+(defn router 
+  {:init/inject [#{:reitit/route-data}]}
+  [data]
+  (ring/router
+    data
     {:validate spec/validate
      :exception pretty/exception
      :data {:coercion (reitit.coercion.malli/create
@@ -64,7 +71,15 @@
                          exception/exception-middleware
                          muuntaja/format-request-middleware
                          coercion/coerce-response-middleware
-                         coercion/coerce-request-middleware]}})
+                         coercion/coerce-request-middleware]}}))
+
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
+(defn ring-handler
+  {:init/tags [:ring/handler]
+   :init/inject [::router]}
+  [router]
+  (ring/ring-handler
+   router
    (ring/routes
     (swagger-ui/create-swagger-ui-handler
      {:path "/"
@@ -75,11 +90,19 @@
                :operationsSorter "alpha"}})
     (ring/create-default-handler))))
 
-(defn start []
-  (jetty/run-jetty #'app {:port 3000, :join? false})
-  (println "server running in port 3000"))
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
+(defn start
+  {:init/tags [:init/daemon]
+   :init/inject [:ring/handler [:get :app/config :port]]}
+  [handler port]
+  (jetty/run-jetty handler {:port port, :join? false})
+  (println "server running in port " port))
 
 (comment
-  (start))
+  (require '[init.core :as init])
+  (require '[init.discovery :as discovery])
 
+  (def config (discovery/static-scan '[cumbuca]))
 
+  (-> (init/start config)
+      (init/stop-on-shutdown)))
